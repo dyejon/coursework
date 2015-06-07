@@ -138,7 +138,9 @@ cp -a ~/.ssh ~hadoop/.ssh
 chown -R hadoop ~hadoop/.ssh
 ```
 
- * Setup passwordless ssh from hadoop@master to hadoop@master, hadoop@slave1 and hadoop@slave2 by copying the files in `~hadoop/.ssh` between them.  __From your workstation, substituting MASTER-IP, SLAVE1-IP, SLAVE2-IP with your VM IPs__
+ * Setup passwordless ssh from hadoop@master to hadoop@master, hadoop@slave1 and hadoop@slave2 by copying the files in `~hadoop/.ssh` between them.  
+
+**For this step start from your workstation, substituting MASTER-IP, SLAVE1-IP, SLAVE2-IP with your VM IPs**
 
 First accept all keys
 
@@ -153,7 +155,7 @@ ssh root@MASTER-IP 'tar -czvp /home/hadoop/.ssh' | ssh root@SLAVE1-IP 'cd /; tar
 ssh root@SLAVE1-IP 'tar -czvp /home/hadoop/.ssh' | ssh root@SLAVE2-IP 'cd /; tar -xzvp'
 ```
 
- * Test your work by trying to ssh __from user hadoop, on master__ to __master (itself)__, slave1 and slave2.  You should issue commands and see output like this:
+ * Test your work by trying to ssh __from user hadoop on master__ to __master (itself)__, slave1 and slave2.  You should issue commands and see output like this:
 
 ```
 root@master:~# su - hadoop
