@@ -105,8 +105,8 @@ adduser hadoop
  * Make sure your key directories have correct permissions
 
 ```
-chown -R hadoop.hadoop /data
-chown -R hadoop.hadoop /usr/local/hadoop
+chown -R hadoop:hadoop /data
+chown -R hadoop:hadoop /usr/local/hadoop
 ```
 
 #### Passwordless SSH 
