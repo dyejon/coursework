@@ -195,8 +195,6 @@ Connection to slave2 closed.
 hadoop@master:~$
 ```
 
-__You should do this step to avoid problems starting the cluster, and to add the slave nodes to the known hosts__ 
-
 ### Switch to hadoop user
 
 **On the master node, and the configuration files will be copied to the other nodes using scp from master as directed**
