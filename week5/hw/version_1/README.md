@@ -11,9 +11,12 @@ provisioning (although ubuntu is a little cheaper).
 Get **2 CPUs**, **4G of RAM**, **1G private / public NICS** and **two disks: 25G and 100G local** the idea is to use 
 the 100G disk for HDFS data and the 25G disk for the OS and housekeeping.
 
-## VM Configuration  - for each node unless otherwise stated
+## VM Configuration
 
 ### Hosts file
+
+**On each node**
+
  * Login into VMs (all 3 of them) and update `/etc/hosts/` for instance (add your own private IP addresses):
 
 ```
@@ -23,6 +26,8 @@ the 100G disk for HDFS data and the 25G disk for the OS and housekeeping.
 ```
 
 ## 100G Disk Formatting
+
+**On each node- note that the disk devices may be different on any node**
 
  * You need to find out the name of your disk, e.g
 
@@ -55,6 +60,8 @@ mount /data
 
 ### Prerequisites 
 
+**On each node**
+
  * Install JDK
 
 **UBUNTU**
@@ -85,7 +92,9 @@ yum install -y nmon
 
 ### Hadoop Download
 
-Download the files into `/usr/local` and extract it
+**On each node**
+
+Download the files into `/usr/local` and extract it  
 
 ```
 cd /usr/local
@@ -96,7 +105,9 @@ mv hadoop-1.2.1 hadoop
 
 ### Hadoop Install preparation
 
- * Create a user hadoop (all 3 nodes)
+**On each node**
+
+ * Create a user hadoop (all 3 nodes).  Give it a password that will not be easily guessed or your machine might be compromised
 
 ```
 adduser hadoop
@@ -111,13 +122,15 @@ chown -R hadoop:hadoop /usr/local/hadoop
 
 #### Passwordless SSH 
 
- * Add the public key (in `~root/.ssh/id_rsa.pub`) to `~hadoop/.ssh/authorized_keys` on master
+**On the master node, and you will copy the results to each node as directed**
+
+ * Add the public key (in `~root/.ssh/id_rsa.pub`) to `~root/.ssh/authorized_keys` on master  
 
 ```
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys 
 ```
 
- * Copy the key pair and authorized hosts from the root user to the Hadoop user
+ * Copy the key pair and authorized hosts from the root user to the Hadoop user  
 
 ```
 mv ~hadoop/.ssh{,-old}
@@ -125,7 +138,7 @@ cp -a ~/.ssh ~hadoop/.ssh
 chown -R hadoop ~hadoop/.ssh
 ```
 
- * Setup passwordless ssh from hadoop@master to hadoop@master, hadoop@slave1 and hadoop@slave2 by copying the files in `~hadoop/.ssh` between them.  __From your workstation, substituting MASTER-IP, etc with your VM IPs__
+ * Setup passwordless ssh from hadoop@master to hadoop@master, hadoop@slave1 and hadoop@slave2 by copying the files in `~hadoop/.ssh` between them.  __From your workstation, substituting MASTER-IP, SLAVE1-IP, SLAVE2-IP with your VM IPs__
 
 First accept all keys
 
@@ -153,7 +166,7 @@ Are you sure you want to continue connecting (yes/no)? yes
 Warning: Permanently added 'master,10.76.68.69' (ECDSA) to the list of known hosts.
 ...
 hadoop@master:~$ logout
-Connection to slave1 closed.
+Connection to master closed.
 hadoop@master:~$
 ```
 
@@ -186,7 +199,9 @@ __You should do this step to avoid problems starting the cluster, and to add the
 
 ### Switch to hadoop user
 
- * From now on, you're working as user hadoop.
+**On the master node, and the configuration files will be copied to the other nodes using scp from master as directed**
+
+ * From now on, you're working as user hadoop 
 
 ```
 su – hadoop
@@ -212,8 +227,7 @@ source .profile
 cd /usr/local/hadoop
 ```
 
-
- * Change `conf/masters` and `conf/slaves` (on the master node only)
+ * Change `conf/masters` and `conf/slaves`
 
 In the `conf/masters` file, list your master by name
 
@@ -301,6 +315,8 @@ hadoop namenode -format
 
 ## Starting the Cluster
 
+**Run these commands as the hadoop user on the master node**
+
  * After hadoop is installed and formatted, you can start your cluster with
 
 ```
@@ -321,6 +337,8 @@ with:
 
 ## Stopping the cluster
 
+**Run these commands as the hadoop user on the master node**
+
 ```
 /usr/local/hadoop/bin/stop-all.sh
 ```
@@ -338,6 +356,8 @@ Log files are located under `/usr/local/hadoop/logs`
 You can check the java services running once your cluster is running using `jps`
 
 ## Run Terasort
+
+**Run these commands as the hadoop user on the master node**
 
  * The example below will generate a 10GB set:
 

@@ -11,9 +11,12 @@ provisioning (although ubuntu is a little cheaper).
 Get **2 CPUs**, **4G of RAM**, **1G private / public NICS** and **two disks: 25G and 100G local** the idea is to use 
 the 100G disk for HDFS data and the 25G disk for the OS and housekeeping.
 
-## VM Configuration  - for each node unless otherwise stated
+## VM Configuration
 
 ### Hosts file
+
+**On each node**
+
  * Login into VMs (all 3 of them) and update `/etc/hosts/` for instance (add your own private IP addresses):
 
 ```
@@ -23,6 +26,8 @@ the 100G disk for HDFS data and the 25G disk for the OS and housekeeping.
 ```
 
 ## 100G Disk Formatting
+
+**On each node- note that the disk devices may be different on any node**
 
  * You need to find out the name of your disk, e.g
 
@@ -53,7 +58,9 @@ mount /data
 
 ## Hadoop Install
 
-### Prerequisites 
+### Prerequisites
+
+**On each node**
 
  * Install JDK
 
@@ -85,7 +92,9 @@ yum install -y nmon
 
 ### Hadoop Download
 
-Download the files into `/usr/local` and extract it
+**On each node**
+
+Download the files into `/usr/local` and extract it  
 
 ```
 cd /usr/local
@@ -96,7 +105,9 @@ mv hadoop-2.6.0 hadoop
 
 ### Hadoop Install preparation
 
- * Create a user hadoop (all 3 nodes)
+**On each node**
+
+ * Create a user hadoop.  Give it a password that will not be easily guessed or your machine might be compromised
 
 ```
 adduser hadoop
@@ -109,7 +120,9 @@ chown -R hadoop:hadoop /data
 chown -R hadoop:hadoop /usr/local/hadoop
 ```
 
-#### Passwordless SSH 
+#### Passwordless SSH
+
+**On the master node, and you will copy the results to each node as directed**
 
  * Add the public key (in `~root/.ssh/id_rsa.pub`) to `~hadoop/.ssh/authorized_keys` on master
 
@@ -125,7 +138,7 @@ cp -a ~/.ssh ~hadoop/.ssh
 chown -R hadoop ~hadoop/.ssh
 ```
 
- * Setup passwordless ssh from hadoop@master to hadoop@master, hadoop@slave1 and hadoop@slave2 by copying the files in `~hadoop/.ssh` between them.  __From your workstation, substituting MASTER-IP, etc with your VM IPs__
+ * Setup passwordless ssh from hadoop@master to hadoop@master, hadoop@slave1 and hadoop@slave2 by copying the files in `~hadoop/.ssh` between them.  __From your workstation, substituting MASTER-IP, SLAVE1-IP, SLAVE2-IP with your VM IPs__
 
 First accept all keys
 
@@ -142,8 +155,6 @@ ssh root@SLAVE1-IP 'tar -czvp /home/hadoop/.ssh' | ssh root@SLAVE2-IP 'cd /; tar
 
  * Test your work by trying to ssh __from user hadoop, on master__ to __master (itself)__, slave1 and slave2.  You should issue commands and see output like this:
 
-__The administrative scripts use ssh to start the namenode(s), tasktrackers and datanodes on each, including master__
-
 ```
 root@master:~# su - hadoop
 hadoop@master:~$ ssh master
@@ -153,7 +164,7 @@ Are you sure you want to continue connecting (yes/no)? yes
 Warning: Permanently added 'master,10.76.68.69' (ECDSA) to the list of known hosts.
 ...
 hadoop@master:~$ logout
-Connection to slave1 closed.
+Connection to master closed.
 hadoop@master:~$
 ```
 
@@ -186,6 +197,8 @@ __You should do this step to avoid problems starting the cluster, and to add the
 
 ### Switch to hadoop user
 
+**On the master node, and the configuration files will be copied to the other nodes using scp from master as directed**
+
  * From now on, you're working as user hadoop.
 
 ```
@@ -204,7 +217,7 @@ export PATH=$PATH:/usr/local/hadoop/bin
 source .profile
 ```
 
-### Edit Configuration Files 
+### Edit Configuration Files
 
  * Go to the hadoop home directory `/usr/local/hadoop/etc/hadoop`
 
@@ -212,7 +225,7 @@ source .profile
 cd /usr/local/hadoop/etc/hadoop
 ```
 
- * Change `./masters` and `./slaves` files (on the master node only)
+ * Change `./masters` and `./slaves` files
 
 In the `./masters` file, list your master by name
 
@@ -318,7 +331,7 @@ name>
 </configuration>
 ```
 
- * Copy all your files to the other machines since you need this configuration on all the nodes:
+ * Copy all your files to the other machines since you need this configuration on all the nodes (as the hadoop user):
 
 ```
 scp –r /usr/local/hadoop/etc/hadoop/* hadoop@slave1:/usr/local/hadoop/etc/hadoop/
@@ -331,9 +344,11 @@ scp –r /usr/local/hadoop/etc/hadoop/* hadoop@slave2:/usr/local/hadoop/etc/hado
 hadoop namenode -format
 ```
 
-## Starting The Cluster
+## Starting the Cluster
 
- * For master node, start everything. 
+**Run these commands as the hadoop user, on the indicated node**
+
+ * For the master node, start everything. 
 
 ```
 /usr/local/hadoop/sbin/hadoop-daemon.sh --config /usr/local/hadoop/etc/hadoop --script hdfs start namenode
@@ -359,6 +374,8 @@ Log files are located under `/usr/local/hadoop/logs`
 You can check the java services running once your cluster is running using `jps`
 
 ## Run Terasort
+
+**Run these commands as the hadoop user on the master node**
 
  * The example below will generate a 10GB set:
 
